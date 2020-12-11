@@ -3,11 +3,6 @@ Test fscanf() function: usage variations - char formats with chars
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan different chars using different char format types */
 
 $file_path = __DIR__;
@@ -24,10 +19,10 @@ if($file_handle == false)
 $char_types = array( 'a', "a", 67, -67, 99 );
 
 $char_formats = array( "%c",
-		       "%hc", "%lc", "%Lc",
-		       " %c", "%c ", "% c",
-		       "\t%c", "\n%c", "%4c",
-		       "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
+               "%hc", "%lc", "%Lc",
+               " %c", "%c ", "% c",
+               "\t%c", "\n%c", "%4c",
+               "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
 
 $counter = 1;
 

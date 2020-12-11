@@ -4,11 +4,6 @@ Test ctype_graph() function : usage variations - different data types as $c arg
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-/* Prototype  : bool ctype_graph(mixed $c)
- * Description: Checks for any printable character(s) except space
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass different data types as $c argument to ctype_graph() to test behaviour
  */
@@ -24,9 +19,9 @@ unset ($unset_var);
 // get a class
 class classA
 {
-	public function __toString() {
-		return "myClass";
-	}
+    public function __toString() {
+        return "myClass";
+    }
 }
 
 // heredoc string

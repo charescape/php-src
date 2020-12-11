@@ -7,7 +7,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 }
 exec('net session 2>&1', $out, $status);
 if (!$status) {
-	die('skip test runs under an elevated user account');
+    die('skip test runs under an elevated user account');
 }
 ?>
 --FILE--
@@ -16,4 +16,4 @@ if (!$status) {
 file_put_contents('C:\Program Files\myfile.txt', 'hello');
 ?>
 --EXPECTF--
-Warning: file_put_contents(C:\Program Files\myfile.txt): failed to open stream: Permission denied in %sbug47517.php on line %d
+Warning: file_put_contents(C:\Program Files\myfile.txt): Failed to open stream: Permission denied in %sbug47517.php on line %d

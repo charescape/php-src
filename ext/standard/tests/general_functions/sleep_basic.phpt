@@ -6,11 +6,6 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
-/* Prototype  : int sleep  ( int $seconds  )
- * Description: Delays the program execution for the given number of seconds .
- * Source code: ext/standard/basic_functions.c
- */
-
 echo "*** Testing sleep() : basic functionality ***\n";
 
 $sleeptime = 1; // sleep for 1 seconds
@@ -32,9 +27,9 @@ echo "Thread slept for " . $time . " seconds\n";
 echo "Return value: " . $result . "\n";
 
 if ($time >= $sleeplow) {
-	echo "TEST PASSED\n";
+    echo "TEST PASSED\n";
 } else {
-	echo "TEST FAILED - time is ${time} secs and sleep was ${sleeptime} secs\n";
+    echo "TEST FAILED - time is ${time} secs and sleep was ${sleeptime} secs\n";
 }
 ?>
 --EXPECTF--

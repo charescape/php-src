@@ -2,11 +2,6 @@
 Test sprintf() function : usage variations - unexpected values for format argument
 --FILE--
 <?php
-/* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 /*
 * Testing sprintf() : with different unexpected values for format argument other than the strings
 */
@@ -117,7 +112,7 @@ fclose($file_handle);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : with unexpected values for format argument ***
 
 -- Iteration 1 --
@@ -166,29 +161,29 @@ string(3) "0.5"
 string(3) "0.5"
 
 -- Iteration 10 --
-sprintf() expects parameter 1 to be string, array given
-sprintf() expects parameter 1 to be string, array given
-sprintf() expects parameter 1 to be string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 11 --
-sprintf() expects parameter 1 to be string, array given
-sprintf() expects parameter 1 to be string, array given
-sprintf() expects parameter 1 to be string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 12 --
-sprintf() expects parameter 1 to be string, array given
-sprintf() expects parameter 1 to be string, array given
-sprintf() expects parameter 1 to be string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 13 --
-sprintf() expects parameter 1 to be string, array given
-sprintf() expects parameter 1 to be string, array given
-sprintf() expects parameter 1 to be string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 14 --
-sprintf() expects parameter 1 to be string, array given
-sprintf() expects parameter 1 to be string, array given
-sprintf() expects parameter 1 to be string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 15 --
 string(0) ""
@@ -246,7 +241,7 @@ string(0) ""
 string(0) ""
 
 -- Iteration 26 --
-sprintf() expects parameter 1 to be string, resource given
-sprintf() expects parameter 1 to be string, resource given
-sprintf() expects parameter 1 to be string, resource given
+sprintf(): Argument #1 ($format) must be of type string, resource given
+sprintf(): Argument #1 ($format) must be of type string, resource given
+sprintf(): Argument #1 ($format) must be of type string, resource given
 Done

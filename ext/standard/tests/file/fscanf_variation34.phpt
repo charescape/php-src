@@ -3,16 +3,11 @@ Test fscanf() function: usage variations - hexa formats with float values
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) {
-	die("skip this test is for 32bit platform only");
+    die("skip this test is for 32bit platform only");
 }
 ?>
 --FILE--
 <?php
-
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
 
 /* Test fscanf() to scan float values using different hexa format types */
 
@@ -47,10 +42,10 @@ $float_values = array (
 );
 
 $hexa_formats = array( 	"%x",
-			"%hx", "%lx", "%Lx",
-		        " %x", "%x ", "% x",
-		        "\t%x", "\n%x", "%4x",
-	  	        "%30x", "%[0-9A-Za-z]", "%*x");
+            "%hx", "%lx", "%Lx",
+                " %x", "%x ", "% x",
+                "\t%x", "\n%x", "%4x",
+                "%30x", "%[0-9A-Za-z]", "%*x");
 
 $counter = 1;
 

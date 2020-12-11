@@ -2,12 +2,6 @@
 Test join() function : usage variations - unexpected values for 'glue' argument
 --FILE--
 <?php
-/* Prototype  : string join( string $glue, array $pieces )
- * Description: Join array elements with a string
- * Source code: ext/standard/string.c
- * Alias of function: implode()
-*/
-
 /*
  * testing join() by passing different unexpected value for glue argument
 */
@@ -102,7 +96,7 @@ for($index = 0; $index < count($values); $index ++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing join() : usage variations ***
 
 --- Testing join() by supplying different values for 'glue' argument ---
@@ -125,15 +119,15 @@ string(29) "element11.07654321E-9element2"
 -- Iteration 9 --
 string(19) "element10.5element2"
 -- Iteration 10 --
-The first argument must be a string
+join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 11 --
-The first argument must be a string
+join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 12 --
-The first argument must be a string
+join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 13 --
-The first argument must be a string
+join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 14 --
-The first argument must be a string
+join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 15 --
 string(17) "element11element2"
 -- Iteration 16 --
@@ -153,7 +147,7 @@ string(16) "element1element2"
 -- Iteration 23 --
 string(16) "element1element2"
 -- Iteration 24 --
-join() expects parameter 1 to be string or array, resource given
+join(): Argument #1 ($separator) must be of type array|string, resource given
 -- Iteration 25 --
 string(16) "element1element2"
 -- Iteration 26 --

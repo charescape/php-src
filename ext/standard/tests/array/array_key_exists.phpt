@@ -2,14 +2,6 @@
 Test array_key_exists() function
 --FILE--
 <?php
-/* Prototype:
- *  bool array_key_exists ( mixed $key, array $search );
- * Description:
- *  Returns TRUE if the given key is set in the array.
- *  key can be any value possible for an array index.
- *  Also also works on objects.
- */
-
 echo "*** Testing basic functionalities ***\n";
 /* Arrays with regular values */
 $search_arrays = array(
@@ -91,7 +83,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functionalities ***
 -- Iteration 1 --
 bool(true)
@@ -224,5 +216,5 @@ bool(true)
 Illegal offset type
 
 *** Testing operation on objects ***
-array_key_exists() expects parameter 2 to be array, object given
+array_key_exists(): Argument #2 ($array) must be of type array, key_check given
 Done

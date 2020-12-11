@@ -2,12 +2,6 @@
 Test array_product() function : variation
 --FILE--
 <?php
-/* Prototype  : mixed array_product(array input)
- * Description: Returns the product of the array entries
- * Source code: ext/standard/array.c
- * Alias to functions:
- */
-
 echo "*** Testing array_product() : variations - negative numbers***\n";
 
 echo "\n-- Testing array_product() function with one negative number --\n";
@@ -43,4 +37,4 @@ int(-24)
 float(-1.5)
 
 -- Testing array_product() function with negative floats --
-float(-9.9999999E+15)
+float(-9999999900000000)

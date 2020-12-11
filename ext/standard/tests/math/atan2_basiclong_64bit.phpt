@@ -4,6 +4,8 @@ Test atan2 function : 64bit long tests
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
+--INI--
+serialize_precision=14
 --FILE--
 <?php
 
@@ -23,7 +25,7 @@ $otherVals = array(0, 1, -1, 7, 9, 65, -44, MAX_32Bit, MIN_32Bit, MAX_64Bit, MIN
 
 foreach ($longVals as $longVal) {
    foreach($otherVals as $otherVal) {
-	   echo "--- testing: $longVal, $otherVal ---\n";
+       echo "--- testing: $longVal, $otherVal ---\n";
       var_dump(atan2($longVal, $otherVal));
    }
 }

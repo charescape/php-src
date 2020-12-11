@@ -16,8 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* {{{ includes
-*/
+/* {{{ includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -114,7 +113,7 @@ again:
 			php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
-			php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
+			php_printf_unchecked("%sfloat(%.*H)\n", COMMON, (int) PG(serialize_precision), Z_DVAL_P(struc));
 			break;
 		case IS_STRING:
 			php_printf("%sstring(%zd) \"", COMMON, Z_STRLEN_P(struc));
@@ -123,21 +122,22 @@ again:
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
-			if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				if (GC_IS_RECURSIVE(myht)) {
 					PUTS("*RECURSION*\n");
 					return;
 				}
+				GC_ADDREF(myht);
 				GC_PROTECT_RECURSION(myht);
 			}
 			count = zend_array_count(myht);
 			php_printf("%sarray(%d) {\n", COMMON, count);
-
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 				php_array_element_dump(val, num, key, level);
 			} ZEND_HASH_FOREACH_END();
-			if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				GC_UNPROTECT_RECURSION(myht);
+				GC_DELREF(myht);
 			}
 			if (level > 1) {
 				php_printf("%*c", level-1, ' ');
@@ -203,8 +203,7 @@ again:
 }
 /* }}} */
 
-/* {{{ proto void var_dump(mixed var)
-   Dumps a string representation of variable to output */
+/* {{{ Dumps a string representation of variable to output */
 PHP_FUNCTION(var_dump)
 {
 	zval *args;
@@ -295,7 +294,7 @@ again:
 		php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
 		break;
 	case IS_DOUBLE:
-		php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
+		php_printf_unchecked("%sfloat(%.*H)\n", COMMON, (int) PG(serialize_precision), Z_DVAL_P(struc));
 		break;
 	case IS_STRING:
 		php_printf("%sstring(%zd) \"", COMMON, Z_STRLEN_P(struc));
@@ -304,20 +303,22 @@ again:
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_P(struc);
-		if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+		if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 			if (GC_IS_RECURSIVE(myht)) {
 				PUTS("*RECURSION*\n");
 				return;
 			}
+			GC_ADDREF(myht);
 			GC_PROTECT_RECURSION(myht);
 		}
 		count = zend_array_count(myht);
-		php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) : 1);
+		php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) - 1 : 1);
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level);
 		} ZEND_HASH_FOREACH_END();
-		if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+		if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 			GC_UNPROTECT_RECURSION(myht);
+			GC_DELREF(myht);
 		}
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');
@@ -379,8 +380,7 @@ again:
 }
 /* }}} */
 
-/* {{{ proto void debug_zval_dump(mixed var)
-   Dumps a string representation of an internal zend value to output. */
+/* {{{ Dumps a string representation of an internal zend value to output. */
 PHP_FUNCTION(debug_zval_dump)
 {
 	zval *args;
@@ -521,6 +521,7 @@ again:
 					zend_error(E_WARNING, "var_export does not handle circular references");
 					return;
 				}
+				GC_ADDREF(myht);
 				GC_PROTECT_RECURSION(myht);
 			}
 			if (level > 1) {
@@ -533,6 +534,7 @@ again:
 			} ZEND_HASH_FOREACH_END();
 			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				GC_UNPROTECT_RECURSION(myht);
+				GC_DELREF(myht);
 			}
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
@@ -605,8 +607,7 @@ PHPAPI void php_var_export(zval *struc, int level) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed var_export(mixed var [, bool return])
-   Outputs or returns a string representation of a variable */
+/* {{{ Outputs or returns a string representation of a variable */
 PHP_FUNCTION(var_export)
 {
 	zval *var;
@@ -657,7 +658,7 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 
 	if (zv) {
 		/* References are only counted once, undo the data->n increment above */
-		if (is_ref) {
+		if (is_ref && Z_LVAL_P(zv) != -1) {
 			data->n -= 1;
 		}
 
@@ -729,8 +730,11 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 	}
 
 	if (!HASH_OF(retval)) {
+		zend_class_entry *ce;
+		ZEND_ASSERT(Z_TYPE_P(struc) == IS_OBJECT);
+		ce = Z_OBJCE_P(struc);
 		zval_ptr_dtor(retval);
-		php_error_docref(NULL, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize");
+		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(ce->name));
 		return FAILURE;
 	}
 
@@ -740,16 +744,12 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 
 static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{{ */
 {
-	zval fname;
-	int res;
-
-	ZVAL_STRINGL(&fname, "__serialize", sizeof("__serialize") - 1);
 	BG(serialize_lock)++;
-	res = call_user_function(CG(function_table), obj, &fname, retval, 0, 0);
+	zend_call_known_instance_method_with_0_params(
+		Z_OBJCE_P(obj)->__serialize, Z_OBJ_P(obj), retval);
 	BG(serialize_lock)--;
-	zval_ptr_dtor_str(&fname);
 
-	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
+	if (EG(exception)) {
 		zval_ptr_dtor(retval);
 		return FAILURE;
 	}
@@ -764,112 +764,168 @@ static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{
 }
 /* }}} */
 
-static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{{ */
+static int php_var_serialize_try_add_sleep_prop(
+		HashTable *ht, HashTable *props, zend_string *name, zend_string *error_name, zval *struc) /* {{{ */
 {
-	zval *val;
-	zend_string *name, *tmp_name;
+	zval *val = zend_hash_find(props, name);
+	if (val == NULL) {
+		return FAILURE;
+	}
 
-	zend_hash_init(ht, zend_hash_num_elements(src), NULL, NULL, 0);
-	ZEND_HASH_FOREACH_VAL(src, val) {
-		if (Z_TYPE_P(val) != IS_STRING) {
-			php_error_docref(NULL, E_NOTICE,
-					"__sleep should return an array only containing the names of instance-variables to serialize.");
+	if (Z_TYPE_P(val) == IS_INDIRECT) {
+		val = Z_INDIRECT_P(val);
+		if (Z_TYPE_P(val) == IS_UNDEF) {
+			zend_property_info *info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
+			if (info) {
+				return SUCCESS;
+			}
+			return FAILURE;
+		}
+	}
+
+	if (!zend_hash_add(ht, name, val)) {
+		php_error_docref(NULL, E_NOTICE,
+			"\"%s\" is returned from __sleep() multiple times", ZSTR_VAL(error_name));
+		return SUCCESS;
+	}
+
+	Z_TRY_ADDREF_P(val);
+	return SUCCESS;
+}
+/* }}} */
+
+static int php_var_serialize_get_sleep_props(
+		HashTable *ht, zval *struc, HashTable *sleep_retval) /* {{{ */
+{
+	zend_class_entry *ce = Z_OBJCE_P(struc);
+	HashTable *props = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
+	zval *name_val;
+	int retval = SUCCESS;
+
+	zend_hash_init(ht, zend_hash_num_elements(sleep_retval), NULL, ZVAL_PTR_DTOR, 0);
+	/* TODO: Rewrite this by fetching the property info instead of trying out different
+	 * name manglings? */
+	ZEND_HASH_FOREACH_VAL(sleep_retval, name_val) {
+		zend_string *name, *tmp_name, *priv_name, *prot_name;
+
+		ZVAL_DEREF(name_val);
+		if (Z_TYPE_P(name_val) != IS_STRING) {
+			php_error_docref(NULL, E_WARNING,
+					"%s::__sleep() should return an array only containing the names of instance-variables to serialize",
+					ZSTR_VAL(ce->name));
 		}
 
-		name = zval_get_tmp_string(val, &tmp_name);
-		if (zend_hash_exists(ht, name)) {
-			php_error_docref(NULL, E_NOTICE,
-					"\"%s\" is returned from __sleep multiple times", ZSTR_VAL(name));
+		name = zval_get_tmp_string(name_val, &tmp_name);
+		if (php_var_serialize_try_add_sleep_prop(ht, props, name, name, struc) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
 			continue;
 		}
-		zend_hash_add_empty_element(ht, name);
+
+		if (EG(exception)) {
+			zend_tmp_string_release(tmp_name);
+			retval = FAILURE;
+			break;
+		}
+
+		priv_name = zend_mangle_property_name(
+			ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
+			ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+		if (php_var_serialize_try_add_sleep_prop(ht, props, priv_name, name, struc) == SUCCESS) {
+			zend_tmp_string_release(tmp_name);
+			zend_string_release(priv_name);
+			continue;
+		}
+		zend_string_release(priv_name);
+
+		if (EG(exception)) {
+			zend_tmp_string_release(tmp_name);
+			retval = FAILURE;
+			break;
+		}
+
+		prot_name = zend_mangle_property_name(
+			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+		if (php_var_serialize_try_add_sleep_prop(ht, props, prot_name, name, struc) == SUCCESS) {
+			zend_tmp_string_release(tmp_name);
+			zend_string_release(prot_name);
+			continue;
+		}
+		zend_string_release(prot_name);
+
+		if (EG(exception)) {
+			zend_tmp_string_release(tmp_name);
+			retval = FAILURE;
+			break;
+		}
+
+		php_error_docref(NULL, E_WARNING,
+			"\"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
 		zend_tmp_string_release(tmp_name);
 	} ZEND_HASH_FOREACH_END();
+
+	zend_release_properties(props);
+	return retval;
+}
+/* }}} */
+
+static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable *ht, uint32_t count, zend_bool incomplete_class, php_serialize_data_t var_hash) /* {{{ */
+{
+	smart_str_append_unsigned(buf, count);
+	smart_str_appendl(buf, ":{", 2);
+	if (count > 0) {
+		zend_string *key;
+		zval *data;
+		zend_ulong index;
+
+		ZEND_HASH_FOREACH_KEY_VAL_IND(ht, index, key, data) {
+			if (incomplete_class && strcmp(ZSTR_VAL(key), MAGIC_MEMBER) == 0) {
+				continue;
+			}
+
+			if (!key) {
+				php_var_serialize_long(buf, index);
+			} else {
+				php_var_serialize_string(buf, ZSTR_VAL(key), ZSTR_LEN(key));
+			}
+
+			if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
+				data = Z_REFVAL_P(data);
+			}
+
+			/* we should still add element even if it's not OK,
+			 * since we already wrote the length of the array before */
+			if (Z_TYPE_P(data) == IS_ARRAY) {
+				if (UNEXPECTED(Z_IS_RECURSIVE_P(data))
+					|| UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))) {
+					php_add_var_hash(var_hash, struc);
+					smart_str_appendl(buf, "N;", 2);
+				} else {
+					if (Z_REFCOUNTED_P(data)) {
+						Z_PROTECT_RECURSION_P(data);
+					}
+					php_var_serialize_intern(buf, data, var_hash);
+					if (Z_REFCOUNTED_P(data)) {
+						Z_UNPROTECT_RECURSION_P(data);
+					}
+				}
+			} else {
+				php_var_serialize_intern(buf, data, var_hash);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	smart_str_appendc(buf, '}');
 }
 /* }}} */
 
 static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash) /* {{{ */
 {
-	zend_class_entry *ce = Z_OBJCE_P(struc);
-	HashTable names, *propers;
-	zval nval;
-	zend_string *name;
-
-	php_var_serialize_class_name(buf, struc);
-	php_var_serialize_collect_names(&names, HASH_OF(retval_ptr));
-
-	smart_str_append_unsigned(buf, zend_hash_num_elements(&names));
-	smart_str_appendl(buf, ":{", 2);
-
-	ZVAL_NULL(&nval);
-	propers = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
-
-	ZEND_HASH_FOREACH_STR_KEY(&names, name) {
-		zend_string *prot_name, *priv_name;
-
-		zval *val = zend_hash_find_ex(propers, name, 1);
-		if (val != NULL) {
-			if (Z_TYPE_P(val) == IS_INDIRECT) {
-				val = Z_INDIRECT_P(val);
-				if (Z_TYPE_P(val) == IS_UNDEF) {
-					goto undef_prop;
-				}
-			}
-
-			php_var_serialize_string(buf, ZSTR_VAL(name), ZSTR_LEN(name));
-			php_var_serialize_intern(buf, val, var_hash);
-			continue;
-		}
-
-		priv_name = zend_mangle_property_name(
-				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), ZSTR_VAL(name), ZSTR_LEN(name), 0);
-		val = zend_hash_find(propers, priv_name);
-		if (val != NULL) {
-			if (Z_TYPE_P(val) == IS_INDIRECT) {
-				val = Z_INDIRECT_P(val);
-				if (Z_ISUNDEF_P(val)) {
-					zend_string_free(priv_name);
-					goto undef_prop;
-				}
-			}
-
-			php_var_serialize_string(buf, ZSTR_VAL(priv_name), ZSTR_LEN(priv_name));
-			zend_string_free(priv_name);
-			php_var_serialize_intern(buf, val, var_hash);
-			continue;
-		}
-		zend_string_free(priv_name);
-
-		prot_name = zend_mangle_property_name(
-				"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), 0);
-		val = zend_hash_find(propers, prot_name);
-		if (val != NULL) {
-			if (Z_TYPE_P(val) == IS_INDIRECT) {
-				val = Z_INDIRECT_P(val);
-				if (Z_TYPE_P(val) == IS_UNDEF) {
-					zend_string_free(prot_name);
-					goto undef_prop;
-				}
-			}
-
-			php_var_serialize_string(buf, ZSTR_VAL(prot_name), ZSTR_LEN(prot_name));
-			zend_string_free(prot_name);
-			php_var_serialize_intern(buf, val, var_hash);
-			continue;
-		}
-		zend_string_free(prot_name);
-
-undef_prop:
-		php_var_serialize_string(buf, ZSTR_VAL(name), ZSTR_LEN(name));
-		php_var_serialize_intern(buf, &nval, var_hash);
-		php_error_docref(NULL, E_NOTICE,
-				"\"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
-	} ZEND_HASH_FOREACH_END();
-	smart_str_appendc(buf, '}');
-
-	zend_hash_destroy(&names);
-	zend_release_properties(propers);
+	HashTable props;
+	if (php_var_serialize_get_sleep_props(&props, struc, HASH_OF(retval_ptr)) == SUCCESS) {
+		php_var_serialize_class_name(buf, struc);
+		php_var_serialize_nested_data(
+			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash);
+	}
+	zend_hash_destroy(&props);
 }
 /* }}} */
 
@@ -933,15 +989,16 @@ again:
 
 		case IS_OBJECT: {
 				zend_class_entry *ce = Z_OBJCE_P(struc);
+				zend_bool incomplete_class;
+				uint32_t count;
 
-				if (zend_hash_str_exists(&ce->function_table, "__serialize", sizeof("__serialize")-1)) {
+				if (ce->__serialize) {
 					zval retval, obj;
 					zend_string *key;
 					zval *data;
 					zend_ulong index;
 
-					Z_ADDREF_P(struc);
-					ZVAL_OBJ(&obj, Z_OBJ_P(struc));
+					ZVAL_OBJ_COPY(&obj, Z_OBJ_P(struc));
 					if (php_var_serialize_call_magic_serialize(&retval, &obj) == FAILURE) {
 						if (!EG(exception)) {
 							smart_str_appendl(buf, "N;", 2);
@@ -1004,8 +1061,7 @@ again:
 				if (ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
 					zval retval, tmp;
 
-					Z_ADDREF_P(struc);
-					ZVAL_OBJ(&tmp, Z_OBJ_P(struc));
+					ZVAL_OBJ_COPY(&tmp, Z_OBJ_P(struc));
 
 					if (php_var_serialize_call_sleep(&retval, &tmp) == FAILURE) {
 						if (!EG(exception)) {
@@ -1023,75 +1079,24 @@ again:
 					return;
 				}
 
-				/* fall-through */
-			}
-		case IS_ARRAY: {
-			uint32_t i;
-			zend_bool incomplete_class = 0;
-			if (Z_TYPE_P(struc) == IS_ARRAY) {
-				smart_str_appendl(buf, "a:", 2);
-				myht = Z_ARRVAL_P(struc);
-				i = zend_array_count(myht);
-			} else {
 				incomplete_class = php_var_serialize_class_name(buf, struc);
 				myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
 				/* count after serializing name, since php_var_serialize_class_name
 				 * changes the count if the variable is incomplete class */
-				i = zend_array_count(myht);
-				if (i > 0 && incomplete_class) {
-					--i;
+				count = zend_array_count(myht);
+				if (count > 0 && incomplete_class) {
+					--count;
 				}
-			}
-			smart_str_append_unsigned(buf, i);
-			smart_str_appendl(buf, ":{", 2);
-			if (i > 0) {
-				zend_string *key;
-				zval *data;
-				zend_ulong index;
-
-				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
-
-					if (incomplete_class && strcmp(ZSTR_VAL(key), MAGIC_MEMBER) == 0) {
-						continue;
-					}
-
-					if (!key) {
-						php_var_serialize_long(buf, index);
-					} else {
-						php_var_serialize_string(buf, ZSTR_VAL(key), ZSTR_LEN(key));
-					}
-
-					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
-						data = Z_REFVAL_P(data);
-					}
-
-					/* we should still add element even if it's not OK,
-					 * since we already wrote the length of the array before */
-					if (Z_TYPE_P(data) == IS_ARRAY) {
-						if (UNEXPECTED(Z_IS_RECURSIVE_P(data))
-							|| UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))) {
-							php_add_var_hash(var_hash, struc);
-							smart_str_appendl(buf, "N;", 2);
-						} else {
-							if (Z_REFCOUNTED_P(data)) {
-								Z_PROTECT_RECURSION_P(data);
-							}
-							php_var_serialize_intern(buf, data, var_hash);
-							if (Z_REFCOUNTED_P(data)) {
-								Z_UNPROTECT_RECURSION_P(data);
-							}
-						}
-					} else {
-						php_var_serialize_intern(buf, data, var_hash);
-					}
-				} ZEND_HASH_FOREACH_END();
-			}
-			smart_str_appendc(buf, '}');
-			if (Z_TYPE_P(struc) == IS_OBJECT) {
+				php_var_serialize_nested_data(buf, struc, myht, count, incomplete_class, var_hash);
 				zend_release_properties(myht);
+				return;
 			}
+		case IS_ARRAY:
+			smart_str_appendl(buf, "a:", 2);
+			myht = Z_ARRVAL_P(struc);
+			php_var_serialize_nested_data(
+				buf, struc, myht, zend_array_count(myht), /* incomplete_class */ 0, var_hash);
 			return;
-		}
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);
 			goto again;
@@ -1109,7 +1114,7 @@ PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t 
 }
 /* }}} */
 
-PHPAPI php_serialize_data_t php_var_serialize_init() {
+PHPAPI php_serialize_data_t php_var_serialize_init(void) {
 	struct php_serialize_data *d;
 	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
 	if (BG(serialize_lock) || !BG(serialize).level) {
@@ -1138,8 +1143,7 @@ PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
 	}
 }
 
-/* {{{ proto string serialize(mixed variable)
-   Returns a string representation of variable (which can later be unserialized) */
+/* {{{ Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
 {
 	zval *struc;
@@ -1156,7 +1160,7 @@ PHP_FUNCTION(serialize)
 
 	if (EG(exception)) {
 		smart_str_free(&buf);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (buf.s) {
@@ -1167,24 +1171,14 @@ PHP_FUNCTION(serialize)
 }
 /* }}} */
 
-/* {{{ proto mixed unserialize(string variable_representation[, array options])
-   Takes a string representation of variable and recreates it */
-PHP_FUNCTION(unserialize)
+/* {{{ Takes a string representation of variable and recreates it, subject to the optional unserialize options HashTable */
+PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, const size_t buf_len, HashTable *options, const char* function_name)
 {
-	char *buf = NULL;
-	size_t buf_len;
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
-	zval *options = NULL;
 	zval *retval;
 	HashTable *class_hash = NULL, *prev_class_hash;
 	zend_long prev_max_depth, prev_cur_depth;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(buf, buf_len)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY(options)
-	ZEND_PARSE_PARAMETERS_END();
 
 	if (buf_len == 0) {
 		RETURN_FALSE;
@@ -1199,10 +1193,9 @@ PHP_FUNCTION(unserialize)
 	if (options != NULL) {
 		zval *classes, *max_depth;
 
-		classes = zend_hash_str_find_deref(Z_ARRVAL_P(options), "allowed_classes", sizeof("allowed_classes")-1);
+		classes = zend_hash_str_find_deref(options, "allowed_classes", sizeof("allowed_classes")-1);
 		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
-			php_error_docref(NULL, E_WARNING, "allowed_classes option should be array or boolean");
-			RETVAL_FALSE;
+			zend_type_error("%s(): Option \"allowed_classes\" must be of type array|bool, %s given", function_name, zend_zval_type_name(classes));
 			goto cleanup;
 		}
 
@@ -1228,14 +1221,14 @@ PHP_FUNCTION(unserialize)
 		}
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
 
-		max_depth = zend_hash_str_find_deref(Z_ARRVAL_P(options), "max_depth", sizeof("max_depth") - 1);
+		max_depth = zend_hash_str_find_deref(options, "max_depth", sizeof("max_depth") - 1);
 		if (max_depth) {
 			if (Z_TYPE_P(max_depth) != IS_LONG) {
-				zend_type_error("max_depth should be int");
+				zend_type_error("%s(): Option \"max_depth\" must be of type int, %s given", function_name, zend_zval_type_name(max_depth));
 				goto cleanup;
 			}
 			if (Z_LVAL_P(max_depth) < 0) {
-				zend_value_error("max_depth cannot be negative");
+				zend_value_error("%s(): Option \"max_depth\" must be greater than or equal to 0", function_name);
 				goto cleanup;
 			}
 
@@ -1288,8 +1281,24 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto int memory_get_usage([bool real_usage])
-   Returns the allocated by PHP memory */
+/* {{{ Takes a string representation of variable and recreates it */
+PHP_FUNCTION(unserialize)
+{
+	char *buf = NULL;
+	size_t buf_len;
+	HashTable *options = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(buf, buf_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_unserialize_with_options(return_value, buf, buf_len, options, "unserialize");
+}
+/* }}} */
+
+/* {{{ Returns the allocated by PHP memory */
 PHP_FUNCTION(memory_get_usage) {
 	zend_bool real_usage = 0;
 
@@ -1302,8 +1311,7 @@ PHP_FUNCTION(memory_get_usage) {
 }
 /* }}} */
 
-/* {{{ proto int memory_get_peak_usage([bool real_usage])
-   Returns the peak allocated by PHP memory */
+/* {{{ Returns the peak allocated by PHP memory */
 PHP_FUNCTION(memory_get_peak_usage) {
 	zend_bool real_usage = 0;
 

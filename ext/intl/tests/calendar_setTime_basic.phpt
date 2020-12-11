@@ -5,7 +5,7 @@ date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -17,8 +17,8 @@ $intlcal = IntlCalendar::createInstance('UTC');
 $intlcal->setTime($time * 1000);
 
 var_dump(
-	(float)$time*1000,
-	$intlcal->getTime());
+    (float)$time*1000,
+    $intlcal->getTime());
 
 $intlcal = IntlCalendar::createInstance('UTC');
 intlcal_set_time($intlcal,$time * 1000);

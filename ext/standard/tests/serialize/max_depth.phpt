@@ -68,7 +68,7 @@ class Test implements Serializable {
     public function unserialize($str) {
         // Should fail, due to combined nesting level
         var_dump(unserialize(create_nested_data(129, 'a:1:{i:0;', '}')));
-        // Should succeeed, below combined nesting level
+        // Should succeed, below combined nesting level
         var_dump(unserialize(create_nested_data(128, 'a:1:{i:0;', '}')) !== false);
     }
 }
@@ -104,8 +104,8 @@ var_dump(is_array(unserialize(
 ?>
 --EXPECTF--
 Invalid max_depth:
-max_depth should be int
-max_depth cannot be negative
+unserialize(): Option "max_depth" must be of type int, string given
+unserialize(): Option "max_depth" must be greater than or equal to 0
 Array:
 bool(true)
 

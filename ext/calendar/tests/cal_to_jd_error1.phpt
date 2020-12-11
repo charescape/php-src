@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-invalid calendar ID -1
+cal_to_jd(): Argument #1 ($calendar) must be a valid calendar ID

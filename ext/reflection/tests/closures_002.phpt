@@ -1,10 +1,10 @@
 --TEST--
-Reflection on invokable objects
+Reflection on invocable objects
 --FILE--
 <?php
 
 class Test {
-	function __invoke($a, $b = 0) { }
+    function __invoke($a, $b = 0) { }
 }
 
 $rm = new ReflectionMethod(new Test, '__invoke');

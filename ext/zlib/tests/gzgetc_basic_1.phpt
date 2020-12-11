@@ -3,11 +3,11 @@ Test function gzgetc() by calling it with its expected arguments zlib 1.2.7
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 include 'func.inc';
 if (version_compare(get_zlib_version(), '1.2.7') < 0) {
-	die('skip - only for zlib >= 1.2.7');
+    die('skip - only for zlib >= 1.2.7');
 }
 ?>
 --FILE--
@@ -19,14 +19,14 @@ if (version_compare(get_zlib_version(), '1.2.7') < 0) {
 $f = __DIR__."/004.txt.gz";
 $h = gzopen($f, 'r');
 if ($h) {
-	$count = 0;
-	while (($c = fgetc( $h )) !== false) {
-	   $count++;
-	   echo $c;
-	}
+    $count = 0;
+    while (($c = fgetc( $h )) !== false) {
+       $count++;
+       echo $c;
+    }
 
-	echo "\ncharacters counted=$count\n";
-	gzclose($h);
+    echo "\ncharacters counted=$count\n";
+    gzclose($h);
 }
 
 ?>

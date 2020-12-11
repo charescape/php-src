@@ -6,12 +6,6 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 precision=14
 --FILE--
 <?php
-/* Prototype  : int vfprintf(resource stream, string format, array args)
- * Description: Output a formatted string into a stream
- * Source code: ext/standard/formatted_print.c
- * Alias to functions:
- */
-
 // Open handle
 $file = 'vfprintf_error4.txt';
 $fp = fopen( $file, "a+" );
@@ -38,7 +32,7 @@ $file = 'vfprintf_error4.txt';
 unlink( $file );
 
 ?>
---EXPECTF--
+--EXPECT--
 -- Testing vfprintf() function with other strangeties  --
-vfprintf() expects parameter 1 to be resource, string given
+vfprintf(): Argument #1 ($stream) must be of type resource, string given
 Error found: Argument number must be greater than zero.

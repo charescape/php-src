@@ -2,12 +2,6 @@
 Test join() function : usage variations - unexpected values for 'pieces' argument(Bug#42789)
 --FILE--
 <?php
-/* Prototype  : string join( string $glue, array $pieces )
- * Description: Join array elements with a string
- * Source code: ext/standard/string.c
- * Alias of function: implode()
-*/
-
 /*
  * test join() by passing different unexpected value for pieces argument
 */
@@ -20,7 +14,7 @@ $glue = '::';
 $unset_var = array(1, 2);
 unset($unset_var);
 
-// get a resouce variable
+// get a resource variable
 $fp = fopen(__FILE__, "r");
 
 // define a class
@@ -108,49 +102,49 @@ echo "Done\n";
 
 --- Testing join() by supplying different values for 'pieces' argument ---
 -- Iteration 1 --
-join() expects parameter 2 to be array, int given
+join(): Argument #2 ($array) must be of type ?array, int given
 -- Iteration 2 --
-join() expects parameter 2 to be array, int given
+join(): Argument #2 ($array) must be of type ?array, int given
 -- Iteration 3 --
-join() expects parameter 2 to be array, int given
+join(): Argument #2 ($array) must be of type ?array, int given
 -- Iteration 4 --
-join() expects parameter 2 to be array, int given
+join(): Argument #2 ($array) must be of type ?array, int given
 -- Iteration 5 --
-join() expects parameter 2 to be array, float given
+join(): Argument #2 ($array) must be of type ?array, float given
 -- Iteration 6 --
-join() expects parameter 2 to be array, float given
+join(): Argument #2 ($array) must be of type ?array, float given
 -- Iteration 7 --
-join() expects parameter 2 to be array, float given
+join(): Argument #2 ($array) must be of type ?array, float given
 -- Iteration 8 --
-join() expects parameter 2 to be array, float given
+join(): Argument #2 ($array) must be of type ?array, float given
 -- Iteration 9 --
-join() expects parameter 2 to be array, float given
+join(): Argument #2 ($array) must be of type ?array, float given
 -- Iteration 10 --
-join() expects parameter 2 to be array, bool given
+join(): Argument #2 ($array) must be of type ?array, bool given
 -- Iteration 11 --
-join() expects parameter 2 to be array, bool given
+join(): Argument #2 ($array) must be of type ?array, bool given
 -- Iteration 12 --
-join() expects parameter 2 to be array, bool given
+join(): Argument #2 ($array) must be of type ?array, bool given
 -- Iteration 13 --
-join() expects parameter 2 to be array, bool given
+join(): Argument #2 ($array) must be of type ?array, bool given
 -- Iteration 14 --
-join() expects parameter 2 to be array, string given
+join(): Argument #2 ($array) must be of type ?array, string given
 -- Iteration 15 --
-join() expects parameter 2 to be array, string given
+join(): Argument #2 ($array) must be of type ?array, string given
 -- Iteration 16 --
-join() expects parameter 2 to be array, object given
+join(): Argument #2 ($array) must be of type ?array, test given
 -- Iteration 17 --
-join() expects parameter 2 to be array, string given
+join(): Argument #2 ($array) must be of type ?array, string given
 -- Iteration 18 --
-join() expects parameter 2 to be array, string given
+join(): Argument #2 ($array) must be of type ?array, string given
 -- Iteration 19 --
-join() expects parameter 2 to be array, null given
+join(): Argument #1 ($pieces) must be of type array, string given
 -- Iteration 20 --
-join() expects parameter 2 to be array, null given
+join(): Argument #1 ($pieces) must be of type array, string given
 -- Iteration 21 --
-join() expects parameter 2 to be array, resource given
+join(): Argument #2 ($array) must be of type ?array, resource given
 -- Iteration 22 --
-join() expects parameter 2 to be array, null given
+join(): Argument #1 ($pieces) must be of type array, string given
 -- Iteration 23 --
-join() expects parameter 2 to be array, null given
+join(): Argument #1 ($pieces) must be of type array, string given
 Done

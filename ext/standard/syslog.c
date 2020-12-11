@@ -32,8 +32,7 @@
 #include "basic_functions.h"
 #include "php_ext_syslog.h"
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(syslog)
 {
 	/* error levels */
@@ -127,8 +126,7 @@ void php_openlog(const char *ident, int option, int facility)
 	PG(have_called_openlog) = 1;
 }
 
-/* {{{ proto bool openlog(string ident, int option, int facility)
-   Open connection to system logger */
+/* {{{ Open connection to system logger */
 /*
    ** OpenLog("nettopp", $LOG_PID, $LOG_LOCAL1);
    ** Syslog($LOG_EMERG, "help me!")
@@ -158,13 +156,10 @@ PHP_FUNCTION(openlog)
 }
 /* }}} */
 
-/* {{{ proto bool closelog(void)
-   Close connection to system logger */
+/* {{{ Close connection to system logger */
 PHP_FUNCTION(closelog)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	closelog();
 	if (BG(syslog_device)) {
@@ -175,8 +170,7 @@ PHP_FUNCTION(closelog)
 }
 /* }}} */
 
-/* {{{ proto bool syslog(int priority, string message)
-   Generate a system log message */
+/* {{{ Generate a system log message */
 PHP_FUNCTION(syslog)
 {
 	zend_long priority;

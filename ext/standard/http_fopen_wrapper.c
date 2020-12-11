@@ -103,6 +103,17 @@ static inline void strip_header(char *header_bag, char *lc_header_bag,
 	}
 }
 
+static zend_bool check_has_header(const char *headers, const char *header) {
+	const char *s = headers;
+	while ((s = strstr(s, header))) {
+		if (s == headers || *(s-1) == '\n') {
+			return 1;
+		}
+		s++;
+	}
+	return 0;
+}
+
 static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		const char *path, const char *mode, int options, zend_string **opened_path,
 		php_stream_context *context, int redirect_max, int flags,
@@ -408,7 +419,7 @@ finish:
 		smart_str_appends(&req_buf, "\r\n");
 		efree(protocol_version);
 	} else {
-		smart_str_appends(&req_buf, " HTTP/1.0\r\n");
+		smart_str_appends(&req_buf, " HTTP/1.1\r\n");
 	}
 
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "header")) != NULL) {
@@ -457,45 +468,31 @@ finish:
 				strip_header(user_headers, t, "content-type:");
 			}
 
-			if ((s = strstr(t, "user-agent:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_USER_AGENT;
+			if (check_has_header(t, "user-agent:")) {
+				have_header |= HTTP_HEADER_USER_AGENT;
 			}
-			if ((s = strstr(t, "host:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_HOST;
+			if (check_has_header(t, "host:")) {
+				have_header |= HTTP_HEADER_HOST;
 			}
-			if ((s = strstr(t, "from:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_FROM;
-				}
-			if ((s = strstr(t, "authorization:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_AUTH;
+			if (check_has_header(t, "from:")) {
+				have_header |= HTTP_HEADER_FROM;
 			}
-			if ((s = strstr(t, "content-length:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_CONTENT_LENGTH;
+			if (check_has_header(t, "authorization:")) {
+				have_header |= HTTP_HEADER_AUTH;
 			}
-			if ((s = strstr(t, "content-type:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_TYPE;
+			if (check_has_header(t, "content-length:")) {
+				have_header |= HTTP_HEADER_CONTENT_LENGTH;
 			}
-			if ((s = strstr(t, "connection:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_CONNECTION;
+			if (check_has_header(t, "content-type:")) {
+				have_header |= HTTP_HEADER_TYPE;
 			}
+			if (check_has_header(t, "connection:")) {
+				have_header |= HTTP_HEADER_CONNECTION;
+			}
+
 			/* remove Proxy-Authorization header */
 			if (use_proxy && use_ssl && (s = strstr(t, "proxy-authorization:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
+			    (s == t || *(s-1) == '\n')) {
 				char *p = s + sizeof("proxy-authorization:") - 1;
 
 				while (s > t && (*(s-1) == ' ' || *(s-1) == '\t')) s--;
@@ -845,6 +842,11 @@ finish:
 		php_stream_close(stream);
 		stream = NULL;
 
+		if (transfer_encoding) {
+			php_stream_filter_free(transfer_encoding);
+			transfer_encoding = NULL;
+		}
+
 		if (location[0] != '\0') {
 
 			char new_path[HTTP_HEADER_BLOCK_SIZE];
@@ -961,10 +963,6 @@ out:
 		if (transfer_encoding) {
 			php_stream_filter_append(&stream->readfilters, transfer_encoding);
 		}
-	} else {
-		if (transfer_encoding) {
-			php_stream_filter_free(transfer_encoding);
-		}
 	}
 
 	return stream;
@@ -983,7 +981,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 
 	if (!Z_ISUNDEF(headers)) {
 		if (FAILURE == zend_set_local_var_str(
-				"http_response_header", sizeof("http_response_header")-1, &headers, 1)) {
+				"http_response_header", sizeof("http_response_header")-1, &headers, 0)) {
 			zval_ptr_dtor(&headers);
 		}
 	}

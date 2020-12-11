@@ -3,7 +3,7 @@ Test compress.zlib:// scheme with the directory functions
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -19,6 +19,6 @@ var_dump(rmdir($srcFile));
 bool(false)
 bool(false)
 
-Warning: opendir(compress.zlib://%s/dir.gz): failed to open dir: not implemented in %s on line %d
+Warning: opendir(compress.zlib://%s/dir.gz): Failed to open directory: not implemented in %s on line %d
 bool(false)
 bool(false)

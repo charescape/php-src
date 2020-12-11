@@ -129,7 +129,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 	streams_options |= IGNORE_URL;
 	net_stream = php_stream_open_wrapper(scheme.s + sizeof("pipe://") - 1, "r+", streams_options, NULL);
 	if (!net_stream) {
-		SET_CLIENT_ERROR(error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown errror while connecting");
+		SET_CLIENT_ERROR(error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown error while connecting");
 		DBG_RETURN(NULL);
 	}
 	/*
@@ -263,6 +263,7 @@ MYSQLND_METHOD(mysqlnd_vio, post_connect_set_opt)(MYSQLND_VIO * const vio, const
 		}
 
 		net_stream->chunk_size = vio->data->options.net_read_buffer_size;
+		net_stream->flags |= PHP_STREAM_FLAG_SUPPRESS_ERRORS;
 	}
 
 	DBG_VOID_RETURN;

@@ -2,18 +2,18 @@
 DBA DBM handler test
 --SKIPIF--
 <?php
-	$handler = 'dbm';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'dbm';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
-	$handler = 'dbm';
-	require_once __DIR__ .'/test.inc';
-	require_once __DIR__ .'/dba_handler.inc';
+    $handler = 'dbm';
+    require_once __DIR__ .'/test.inc';
+    require_once __DIR__ .'/dba_handler.inc';
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECT--
 database handler: dbm

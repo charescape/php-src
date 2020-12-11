@@ -216,4 +216,4 @@ Array
     [calname] => Julian
     [calsymbol] => CAL_JULIAN
 )
-invalid calendar ID 99999
+cal_info(): Argument #1 ($calendar) must be a valid calendar ID

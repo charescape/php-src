@@ -8,12 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : void closedir([resource $dir_handle])
- * Description: Close directory connection identified by the dir_handle
- * Source code: ext/standard/dir.c
- * Alias to functions: close
- */
-
 /*
  * Test basic functionality of closedir()
  */
@@ -34,7 +28,7 @@ echo "\n-- Call closedir() with \$dir_handle argument supplied: --\n";
 $dh2 = opendir($dir_path);
 
 if ((int)$dh1 === (int)$dh2) {
-	echo "\nNo new resource created\n";
+    echo "\nNo new resource created\n";
 }
 var_dump(closedir($dh2));
 echo "-- Check Directory Handle: --\n";

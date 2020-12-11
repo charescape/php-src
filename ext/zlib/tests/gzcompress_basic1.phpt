@@ -3,17 +3,11 @@ Test gzcompress() function : basic functionality
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
-/* Prototype  : string gzcompress(string data [, int level, [int encoding]])
- * Description: Gzip-compress a string
- * Source code: ext/zlib/zlib.c
- * Alias to functions:
- */
-
 /*
  * add a comment here to say what the test is supposed to do
  */
@@ -34,7 +28,7 @@ for($i = -1; $i < 10; $i++) {
     echo "-- Compression level $i --\n";
     $output = gzcompress($data, $i);
     var_dump(md5($output));
-	var_dump(strcmp(gzuncompress($output), $data));
+    var_dump(strcmp(gzuncompress($output), $data));
 }
 
 // Compressing a smaller string
@@ -42,7 +36,7 @@ for($i = -1; $i < 10; $i++) {
     echo "-- Compression level $i --\n";
     $output = gzcompress($smallstring, $i);
     var_dump(bin2hex($output));
-	var_dump(strcmp(gzuncompress($output), $smallstring));
+    var_dump(strcmp(gzuncompress($output), $smallstring));
 }
 
 // Calling gzcompress() with mandatory arguments

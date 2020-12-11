@@ -3,7 +3,7 @@ IntlTimeZone equals handler: error test
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -18,7 +18,7 @@ var_dump($tz, $tz2);
 try {
 var_dump($tz == $tz2);
 } catch (Exception $e) {
-	var_dump(get_class($e), $e->getMessage());
+    var_dump(get_class($e), $e->getMessage());
 }
 
 ?>

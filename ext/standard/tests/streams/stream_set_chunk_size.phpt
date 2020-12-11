@@ -3,24 +3,24 @@ stream_set_chunk_size basic tests
 --FILE--
 <?php
 class test_wrapper {
-	function stream_open($path, $mode, $openedpath) {
-		return true;
-	}
-	function stream_eof() {
-		return false;
-	}
-	function stream_read($count) {
-		echo "read with size: ", $count, "\n";
-		return str_repeat('a', $count);
-	}
-	function stream_write($data) {
-		echo "write with size: ", strlen($data), "\n";
-		return strlen($data);
-	}
-	function stream_set_option($option, $arg1, $arg2) {
-		echo "option: ", $option, ", ", $arg1, ", ", $arg2, "\n";
-		return false;
-	}
+    function stream_open($path, $mode, $openedpath) {
+        return true;
+    }
+    function stream_eof() {
+        return false;
+    }
+    function stream_read($count) {
+        echo "read with size: ", $count, "\n";
+        return str_repeat('a', $count);
+    }
+    function stream_write($data) {
+        echo "write with size: ", strlen($data), "\n";
+        return strlen($data);
+    }
+    function stream_set_option($option, $arg1, $arg2) {
+        echo "option: ", $option, ", ", $arg1, ", ", $arg2, "\n";
+        return false;
+    }
 }
 
 var_dump(stream_wrapper_register('test', 'test_wrapper'));
@@ -49,9 +49,18 @@ echo "should have no effect on writes\n";
 var_dump(strlen(fwrite($f, str_repeat('b', 250))));
 
 echo "\nerror conditions\n";
-var_dump(stream_set_chunk_size($f, 0));
-var_dump(stream_set_chunk_size($f, -1));
---EXPECTF--
+try {
+    stream_set_chunk_size($f, 0);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+try {
+    stream_set_chunk_size($f, -1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+?>
+--EXPECT--
 bool(true)
 should return previous chunk size (8192)
 int(8192)
@@ -76,9 +85,5 @@ write with size: 250
 int(3)
 
 error conditions
-
-Warning: stream_set_chunk_size(): The chunk size must be a positive integer, given 0 in %s on line %d
-bool(false)
-
-Warning: stream_set_chunk_size(): The chunk size must be a positive integer, given -1 in %s on line %d
-bool(false)
+stream_set_chunk_size(): Argument #2 ($size) must be greater than 0
+stream_set_chunk_size(): Argument #2 ($size) must be greater than 0

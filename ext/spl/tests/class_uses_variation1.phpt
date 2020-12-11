@@ -2,21 +2,15 @@
 SPL: Test class_uses() function : variation
 --FILE--
 <?php
-/* Prototype  : array class_uses(mixed what [, bool autoload ])
- * Description: Return all traits used by a class
- * Source code: ext/spl/php_spl.c
- * Alias to functions:
- */
-
 echo "*** Testing class_uses() : variation ***\n";
 
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-	if (error_reporting() & $err_no) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+    if (error_reporting() & $err_no) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
 set_error_handler('test_error_handler');
 
@@ -33,9 +27,9 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
@@ -119,61 +113,61 @@ fclose($res);
 *** Testing class_uses() : variation ***
 
 --int 0--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --int 1--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --int 12345--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --int -12345--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 --float 10.5--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float -10.5--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float 12.3456789000e10--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float -12.3456789000e10--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --float .5--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 --empty array--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --int indexed array--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --associative array--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --nested arrays--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 --uppercase NULL--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --lowercase null--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --lowercase true--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 --lowercase false--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 --uppercase TRUE--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 --uppercase FALSE--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 --empty string DQ--
 Error: 2 - class_uses(): Class  does not exist and could not be loaded, %s(%d)
@@ -192,10 +186,10 @@ array(0) {
 }
 
 --undefined var--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --unset var--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 --resource--
-object or string expected
+class_uses(): Argument #1 ($object_or_class) must be of type object|string, resource given

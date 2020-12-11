@@ -14,15 +14,15 @@ file_put_contents($filename, $xmlstring);
 
 $reader = XMLReader::open($filename);
 while ($reader->read()) {
-	echo $reader->name, "\n";
+    echo $reader->name, "\n";
 }
 
 $reader = XMLReader::XML($xmlstring);
 while ($reader->read()) {
-	echo $reader->name, "\n";
+    echo $reader->name, "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 books
 books
 books

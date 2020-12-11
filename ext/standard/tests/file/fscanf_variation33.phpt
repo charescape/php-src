@@ -3,16 +3,11 @@ Test fscanf() function: usage variations - hexa formats with integer values
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) {
-	die("skip this test is for 32bit platform only");
+    die("skip this test is for 32bit platform only");
 }
 ?>
 --FILE--
 <?php
-
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
 
 /* Test fscanf() to scan different integer values using different hexa format types */
 
@@ -49,11 +44,11 @@ $valid_ints = array(
 );
 // various hexa formats
 $hexa_formats = array(  "%x",
-			"%xx", "%lx", "%Lx",
-			" %x", "%x ", "% x",
-		        "\t%x", "\n%x", "%4x",
-		        "%30x", "%[0-9A-Fa-f]", "%*x"
-		);
+            "%xx", "%lx", "%Lx",
+            " %x", "%x ", "% x",
+                "\t%x", "\n%x", "%4x",
+                "%30x", "%[0-9A-Fa-f]", "%*x"
+        );
 
 $counter = 1;
 

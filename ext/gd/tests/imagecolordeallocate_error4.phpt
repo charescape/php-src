@@ -1,11 +1,11 @@
 --TEST--
-Testing imagecolordeallocate() of GD library with Out of range intergers (Below)
+Testing imagecolordeallocate() of GD library with Out of range integers (Below)
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
 <?php
-	if (!extension_loaded("gd")) die("skip GD not present");
+    if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--
 <?php
@@ -22,4 +22,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] Color index -1 out of range
+!! [ValueError] imagecolordeallocate(): Argument #2 ($color) must be between 0 and 1

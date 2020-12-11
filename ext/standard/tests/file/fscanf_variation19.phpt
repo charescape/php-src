@@ -3,11 +3,6 @@ Test fscanf() function: usage variations - string formats with boolean
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan boolean data using different string format types */
 
 $file_path = __DIR__;
@@ -31,8 +26,8 @@ $bool_types = array (
 $string_formats = array( "%s",
                          "%hs", "%ls", "%Ls",
                          " %s", "%s ", "% s",
-			 "\t%s", "\n%s", "%4s",
-			 "%30s", "%[a-zA-Z0-9]", "%*s");
+             "\t%s", "\n%s", "%4s",
+             "%30s", "%[a-zA-Z0-9]", "%*s");
 
 $counter = 1;
 

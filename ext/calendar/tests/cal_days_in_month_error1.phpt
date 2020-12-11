@@ -18,5 +18,5 @@ try{
 }
 ?>
 --EXPECT--
-invalid calendar ID -1
-invalid date
+cal_days_in_month(): Argument #1 ($calendar) must be a valid calendar ID
+Invalid date

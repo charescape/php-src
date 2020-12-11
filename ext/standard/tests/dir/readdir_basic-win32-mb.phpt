@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle
- * Source code: ext/standard/dir.C
- */
-
 /*
  * Test basic functionality of readdir()
  */
@@ -31,22 +26,22 @@ echo "\n-- Call readdir() with \$path argument --\n";
 var_dump($dh = opendir($path));
 $a = array();
 while( FALSE !== ($file = readdir($dh)) ) {
-	$a[] = $file;
+    $a[] = $file;
 }
 sort($a);
 foreach($a as $file) {
-	var_dump($file);
+    var_dump($file);
 }
 
 echo "\n-- Call readdir() without \$path argument --\n";
 var_dump($dh = opendir($path));
 $a = array();
 while( FALSE !== ( $file = readdir() ) ) {
-	$a[] = $file;
+    $a[] = $file;
 }
 sort($a);
 foreach($a as $file) {
-	var_dump($file);
+    var_dump($file);
 }
 
 delete_files($path, 3);

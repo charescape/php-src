@@ -8,10 +8,9 @@ $fname = __DIR__ . '/bug69441.phar';
 try {
 $r = new Phar($fname, 0);
 } catch(UnexpectedValueException $e) {
-	echo $e;
+    echo $e;
 }
 ?>
-
 --EXPECTF--
 UnexpectedValueException: phar error: corrupted central directory entry, no magic signature in zip-based phar "%sbug69441.phar" in %sbug69441.php:%d
 Stack trace:

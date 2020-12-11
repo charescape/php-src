@@ -3,7 +3,7 @@ Bug #70484 selectordinal doesn't work with named parameters
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 
@@ -12,25 +12,25 @@ $locale = array("de", "fr", "en", "ru",);
 $data = array(42, 42.42, 2147483643, 2147483643.12345, 5);
 
 foreach ($locale as $lc) {
-	echo "$lc string key\n";
-	$m = new MessageFormatter($lc, "{n, selectordinal, =5 {five} zero {#-zero} one {#-one} two {#-two} few {#-few} many {#-many} other {#-other}}");
-	foreach ($data as $i) {
-		var_dump($m->format(array("n" => $i)));
-		if ($m->getErrorCode()) {
-			echo "$lc $i ", $m->getErrorMessage();
-		}
-	}
-	echo "\n";
+    echo "$lc string key\n";
+    $m = new MessageFormatter($lc, "{n, selectordinal, =5 {five} zero {#-zero} one {#-one} two {#-two} few {#-few} many {#-many} other {#-other}}");
+    foreach ($data as $i) {
+        var_dump($m->format(array("n" => $i)));
+        if ($m->getErrorCode()) {
+            echo "$lc $i ", $m->getErrorMessage();
+        }
+    }
+    echo "\n";
 
-	echo "$lc numeric key\n";
-	$m = new MessageFormatter($lc, "{0, selectordinal, =5 {five} zero {#-zero} one {#-one} two {#-two} few {#-few} many {#-many} other {#-other}}");
-	foreach ($data as $i) {
-		var_dump($m->format(array($i)));
-		if ($m->getErrorCode()) {
-			echo "$lc $i ", $m->getErrorMessage();
-		}
-	}
-	echo "\n";
+    echo "$lc numeric key\n";
+    $m = new MessageFormatter($lc, "{0, selectordinal, =5 {five} zero {#-zero} one {#-one} two {#-two} few {#-few} many {#-many} other {#-other}}");
+    foreach ($data as $i) {
+        var_dump($m->format(array($i)));
+        if ($m->getErrorCode()) {
+            echo "$lc $i ", $m->getErrorMessage();
+        }
+    }
+    echo "\n";
 }
 
 ?>

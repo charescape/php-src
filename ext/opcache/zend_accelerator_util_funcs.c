@@ -64,6 +64,8 @@ void free_persistent_script(zend_persistent_script *persistent_script, int destr
 	if (!destroy_elements) {
 		persistent_script->script.function_table.pDestructor = NULL;
 		persistent_script->script.class_table.pDestructor = NULL;
+	} else {
+		destroy_op_array(&persistent_script->script.main_op_array);
 	}
 
 	zend_hash_destroy(&persistent_script->script.function_table);
@@ -239,13 +241,13 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 					list = ARENA_REALLOC(list);
 					ZEND_TYPE_SET_PTR(prop_info->type, list);
 
-					void **entry;
-					ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop_info->type), entry) {
-						if (ZEND_TYPE_LIST_IS_CE(*entry)) {
-							zend_class_entry *ce = ZEND_TYPE_LIST_GET_CE(*entry);
+					zend_type *list_type;
+					ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(prop_info->type), list_type) {
+						if (ZEND_TYPE_HAS_CE(*list_type)) {
+							zend_class_entry *ce = ZEND_TYPE_CE(*list_type);
 							if (IN_ARENA(ce)) {
 								ce = ARENA_REALLOC(ce);
-								*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
+								ZEND_TYPE_SET_PTR(*list_type, ce);
 							}
 						}
 					} ZEND_TYPE_LIST_FOREACH_END();
@@ -263,7 +265,7 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 
 #define zend_update_inherited_handler(handler) \
 { \
-	if (ce->handler != NULL) { \
+	if (ce->handler != NULL && IN_ARENA(ce->handler)) { \
 		ce->handler = ARENA_REALLOC(ce->handler); \
 	} \
 }
@@ -367,17 +369,13 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_update_inherited_handler(__get);
 	zend_update_inherited_handler(__set);
 	zend_update_inherited_handler(__call);
-/* 5.1 stuff */
-	zend_update_inherited_handler(serialize_func);
-	zend_update_inherited_handler(unserialize_func);
 	zend_update_inherited_handler(__isset);
 	zend_update_inherited_handler(__unset);
-/* 5.2 stuff */
 	zend_update_inherited_handler(__tostring);
-
-/* 5.3 stuff */
 	zend_update_inherited_handler(__callstatic);
 	zend_update_inherited_handler(__debugInfo);
+	zend_update_inherited_handler(__serialize);
+	zend_update_inherited_handler(__unserialize);
 
 /* 5.4 traits */
 	if (ce->num_traits) {

@@ -20,11 +20,7 @@ jobs:
     - script: make -j$(/usr/bin/nproc) >/dev/null
       displayName: 'Make Build'
     - template: install.yml
-    - script: |
-        mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
-        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
-        sudo -u postgres psql -c "CREATE DATABASE test;"
-      displayName: 'Setup'
+    - template: setup.yml
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
@@ -36,10 +32,13 @@ jobs:
         runTestsParameters: >-
           ${{ parameters.runTestsParameters }}
           -d zend_extension=opcache.so
+    - script: bash <(curl -s https://codecov.io/bash)
+      displayName: 'Upload ${{ parameters.configurationName }} Test Coverage to Codecov.io'
+      condition: or(succeeded(), failed())
     - script: |
         make gcovr-xml
         mv gcovr.xml coverage.xml
-      displayName: 'Generate ${{ parameters.configurationName }} Test Coverage'
+      displayName: 'Generate ${{ parameters.configurationName }} Test Coverage Cobertura XML Report'
       condition: or(succeeded(), failed())
     - task: PublishCodeCoverageResults@1
       inputs:

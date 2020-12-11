@@ -3,11 +3,6 @@ Test fscanf() function: usage variations - char formats with float values
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan float values using different char format types */
 
 $file_path = __DIR__;
@@ -42,9 +37,9 @@ $float_values = array (
 
 $char_formats = array( "%c",
                        "%hc", "%lc", "%Lc",
-		       " %c", "%c ", "% c",
- 	 	       "\t%c", "\n%c", "%4c",
- 		       "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
+               " %c", "%c ", "% c",
+               "\t%c", "\n%c", "%4c",
+               "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
 
 $counter = 1;
 

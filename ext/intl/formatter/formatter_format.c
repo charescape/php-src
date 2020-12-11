@@ -24,11 +24,7 @@
 #include "formatter_format.h"
 #include "intl_convert.h"
 
-/* {{{ proto mixed NumberFormatter::format( mixed $num[, int $type] )
- * Format a number. }}} */
-/* {{{ proto mixed numfmt_format( NumberFormatter $nf, mixed $num[, int type] )
- * Format a number.
- */
+/* {{{ Format a number. */
 PHP_FUNCTION( numfmt_format )
 {
 	zval *number;
@@ -39,32 +35,26 @@ PHP_FUNCTION( numfmt_format )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oz|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "On|l",
 		&object, NumberFormatter_ce_ptr,  &number, &type ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	if(type == FORMAT_TYPE_DEFAULT) {
-		if(Z_TYPE_P(number) == IS_STRING) {
-			convert_scalar_to_number_ex(number);
+		switch(Z_TYPE_P(number)) {
+			case IS_LONG:
+				/* take INT32 on 32-bit, int64 on 64-bit */
+				type = (sizeof(zend_long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
+				break;
+			case IS_DOUBLE:
+				type = FORMAT_TYPE_DOUBLE;
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE();
 		}
-
-		if(Z_TYPE_P(number) == IS_LONG) {
-			/* take INT32 on 32-bit, int64 on 64-bit */
-			type = (sizeof(zend_long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
-		} else if(Z_TYPE_P(number) == IS_DOUBLE) {
-			type = FORMAT_TYPE_DOUBLE;
-		} else {
-			type = FORMAT_TYPE_INT32;
-		}
-	}
-
-	if(Z_TYPE_P(number) != IS_DOUBLE && Z_TYPE_P(number) != IS_LONG) {
-		convert_scalar_to_number(number );
 	}
 
 	switch(type) {
@@ -115,20 +105,15 @@ PHP_FUNCTION( numfmt_format )
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Unsupported format type " ZEND_LONG_FMT, type);
-			RETURN_FALSE;
-			break;
+			zend_argument_value_error(3, "must be a NumberFormatter::TYPE_* constant");
+			RETURN_THROWS();
 	}
 
 	INTL_METHOD_RETVAL_UTF8( nfo, formatted, formatted_len, ( formatted != format_buf ) );
 }
 /* }}} */
 
-/* {{{ proto mixed NumberFormatter::formatCurrency( double $num, string $currency )
- * Format a number as currency. }}} */
-/* {{{ proto mixed numfmt_format_currency( NumberFormatter $nf, double $num, string $currency )
- * Format a number as currency.
- */
+/* {{{ Format a number as currency. */
 PHP_FUNCTION( numfmt_format_currency )
 {
 	double     number;
@@ -145,7 +130,7 @@ PHP_FUNCTION( numfmt_format_currency )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ods",
 		&object, NumberFormatter_ce_ptr,  &number, &currency, &currency_len ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

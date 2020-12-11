@@ -860,20 +860,9 @@ static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, co
 	BY_HANDLE_FILE_INFORMATION d;
 	PBY_HANDLE_FILE_INFORMATION data;
 	LARGE_INTEGER t;
-	wchar_t mypath[MAXPATHLEN];
 	uint8_t is_dir;
 
 	data = !dp ? &d : dp;
-
-	if (!pathw) {
-		pathw_len = GetFinalPathNameByHandleW(h, mypath, MAXPATHLEN, VOLUME_NAME_DOS);
-		if (pathw_len >= MAXPATHLEN || pathw_len == 0) {
-			pathw_len = 0;
-			pathw = NULL;
-		} else {
-			pathw = mypath;
-		}
-	}
 
 	if(!GetFileInformationByHandle(h, data)) {
 		if (INVALID_HANDLE_VALUE != h) {
@@ -1171,8 +1160,8 @@ PW32IO ssize_t php_win32_ioutil_readlink_w(const wchar_t *path, wchar_t *buf, si
 
 	ret = php_win32_ioutil_readlink_int(h, buf, buf_len);
 
-	if (ret < 0) {		
-		wchar_t target[PHP_WIN32_IOUTIL_MAXPATHLEN];		
+	if (ret < 0) {
+		wchar_t target[PHP_WIN32_IOUTIL_MAXPATHLEN];
 		size_t target_len;
 		size_t offset = 0;
 

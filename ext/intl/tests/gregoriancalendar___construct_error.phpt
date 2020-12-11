@@ -3,7 +3,7 @@ IntlGregorianCalendar::__construct(): bad arguments
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -24,18 +24,27 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-	var_dump(new IntlGregorianCalendar(1,2,NULL,4));
+    var_dump(new IntlGregorianCalendar(1,2,NULL,4));
 } catch (ArgumentCountError $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 try {
-	var_dump(new IntlGregorianCalendar(1,2,3,4,NULL,array()));
+    var_dump(new IntlGregorianCalendar(1,2,3,4,NULL,array()));
 } catch (TypeError $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
+
+$cal = new IntlGregorianCalendar();
+try {
+    $cal->__construct();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+?>
 --EXPECT--
 Too many arguments
 Too many arguments
 No variant with 4 arguments (excluding trailing NULLs)
 No variant with 4 arguments (excluding trailing NULLs)
-IntlGregorianCalendar::__construct() expects parameter 6 to be int, array given
+IntlGregorianCalendar::__construct(): Argument #6 ($second) must be of type int, array given
+IntlGregorianCalendar object is already constructed

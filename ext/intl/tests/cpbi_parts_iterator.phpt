@@ -3,7 +3,7 @@ IntlCodepointBreakIterator's part iterator
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -15,8 +15,8 @@ $it = IntlBreakIterator::createCodePointInstance()->getPartsIterator();
 $it->getBreakIterator()->setText($text);
 
 foreach ($it as $k => $v) {
-	echo "$k. $v (" . sprintf("U+%04X", $it->getBreakIterator()->getLastCodePoint()) .
-		") at {$it->getBreakIterator()->current()}\r\n";
+    echo "$k. $v (" . sprintf("U+%04X", $it->getBreakIterator()->getLastCodePoint()) .
+        ") at {$it->getBreakIterator()->current()}\r\n";
 }
 
 ?>

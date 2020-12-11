@@ -10,12 +10,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : bool unlink(string filename[, context context])
- * Description: Delete a file
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing unlink() : variation ***\n";
 
 $workDir = "unlinkVar10.tmp";
@@ -56,18 +50,18 @@ rmdir($workDir);
 
 function test_link($linkedDir, $toLinkTo, $tounlink, $softlink) {
    if ($softlink == true) {
-   	  symlink($toLinkTo, $linkedDir);
-   	  $msg = "soft link";
+      symlink($toLinkTo, $linkedDir);
+      $msg = "soft link";
    }
    else {
-   	  link($toLinkTo, $linkedDir);
-   	  $msg = "hard link";
+      link($toLinkTo, $linkedDir);
+      $msg = "hard link";
    }
    echo "-- unlinking $msg $tounlink --\n";
    $res = unlink($tounlink);
    if ($res === true) {
       if (is_link($tounlink) === false) {
-      	echo "directory unlinked\n";
+        echo "directory unlinked\n";
       }
       else {
         echo "FAILED: directory not unlinked\n";

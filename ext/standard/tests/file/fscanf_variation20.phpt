@@ -3,11 +3,6 @@ Test fscanf() function: usage variations - char formats with integer values
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan different integer values using different char format types */
 
 $file_path = __DIR__;
@@ -43,10 +38,10 @@ $valid_ints = array(
 );
 // various char formats
 $char_formats = array( "%c",
-		       "%hc", "%lc", "%Lc",
-		       " %c", "%c ", "% c",
-		       "\t%c", "\n%c", "%4c",
-		       "%30c", "%[a-bA-B@#$&]", "%*c");
+               "%hc", "%lc", "%Lc",
+               " %c", "%c ", "% c",
+               "\t%c", "\n%c", "%4c",
+               "%30c", "%[a-bA-B@#$&]", "%*c");
 
 $counter = 1;
 

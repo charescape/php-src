@@ -2,17 +2,12 @@
 Test array_diff_ukey() function : usage variation - Passing multi-dimensional array
 --FILE--
 <?php
-/* Prototype  : array array_diff_ukey(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. User supplied function is used for comparing the keys. This function is like array_udiff() but works on the keys instead of the values. The associativity is preserved.
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 $array1 = array(
 
-	  'first' => array('blue' => 1, 'red' => 2),
+      'first' => array('blue' => 1, 'red' => 2),
 
       'second' => array('yellow' => 7),
 
@@ -21,7 +16,7 @@ $array1 = array(
 
 $array2 = array (
 
-	  'first' => array('blue' => 1, 'red' => 2,),
+      'first' => array('blue' => 1, 'red' => 2,),
 
       'second' => array('cyan' => 8),
 

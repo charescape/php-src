@@ -5,6 +5,7 @@ Phar: delete a file within a tar-based .phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
+opcache.validate_timestamps=1
 --FILE--
 <?php
 
@@ -41,7 +42,7 @@ This is b/c
 This is a
 This is b
 
-Warning: include(%sdelete_in_phar.phar.tar/b/c.php): failed to open stream: phar error: "b/c.php" is not a file in phar "%sdelete_in_phar.phar.tar" in %sdelete_in_phar.php on line %d
+Warning: include(%sdelete_in_phar.phar.tar/b/c.php): Failed to open stream: phar error: "b/c.php" is not a file in phar "%sdelete_in_phar.phar.tar" in %sdelete_in_phar.php on line %d
 
 Warning: include(): Failed opening 'phar://%sdelete_in_phar.phar.tar/b/c.php' for inclusion (include_path='%s') in %sdelete_in_phar.php on line %d
 

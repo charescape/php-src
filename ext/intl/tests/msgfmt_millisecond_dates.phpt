@@ -3,7 +3,7 @@ MessageFrormatter parses and formats dates with millisecond precision
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+    die('skip intl extension not enabled');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -11,7 +11,7 @@ date_default_timezone_set('Europe/Lisbon'); //ignored for now, see bug #58756
 
 $d = 1336308097.123;
 $mf = new MessageFormatter('en_US',
-	"On {0,time,yyyy-MM-dd G 'at' HH:mm:ss.SSS zzz} something odd happened");
+    "On {0,time,yyyy-MM-dd G 'at' HH:mm:ss.SSS zzz} something odd happened");
 
 var_dump($mf->format(array(1336310569.123)));
 

@@ -36,12 +36,12 @@
 #define YYFILL(n)		{ RET(PDO_PARSER_EOI); }
 
 typedef struct Scanner {
-	char 	*ptr, *cur, *tok, *end;
+	const char *ptr, *cur, *tok, *end;
 } Scanner;
 
 static int scan(Scanner *s)
 {
-	char *cursor = s->cur;
+	const char *cursor = s->cur;
 
 	s->tok = cursor;
 	/*!re2c
@@ -68,9 +68,9 @@ static int scan(Scanner *s)
 }
 
 struct placeholder {
-	char *pos;
+	const char *pos;
 	size_t len;
-	size_t qlen;		/* quoted length of value */
+	size_t qlen;	/* quoted length of value */
 	char *quoted;	/* quoted value */
 	int freeq;
 	int bindno;
@@ -81,11 +81,12 @@ static void free_param_name(zval *el) {
 	efree(Z_PTR_P(el));
 }
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len,
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, const char *inquery, size_t inquery_len,
 	char **outquery, size_t *outquery_len)
 {
 	Scanner s;
-	char *ptr, *newbuffer;
+	const char *ptr;
+	char *newbuffer;
 	ptrdiff_t t;
 	uint32_t bindno = 0;
 	int ret = 0, escapes = 0;
@@ -142,17 +143,37 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 		}
 	}
 
-	if (!placeholders) {
-		/* nothing to do; good! */
-		return 0;
-	}
-
 	/* did the query make sense to me? */
 	if (query_type == (PDO_PLACEHOLDER_NAMED|PDO_PLACEHOLDER_POSITIONAL)) {
 		/* they mixed both types; punt */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "mixed named and positional parameters");
 		ret = -1;
 		goto clean_up;
+	}
+
+	params = stmt->bound_params;
+	if (stmt->supports_placeholders == PDO_PLACEHOLDER_NONE && params && bindno != zend_hash_num_elements(params)) {
+		/* extra bit of validation for instances when same params are bound more than once */
+		if (query_type != PDO_PLACEHOLDER_POSITIONAL && bindno > zend_hash_num_elements(params)) {
+			int ok = 1;
+			for (plc = placeholders; plc; plc = plc->next) {
+				if ((param = zend_hash_str_find_ptr(params, plc->pos, plc->len)) == NULL) {
+					ok = 0;
+					break;
+				}
+			}
+			if (ok) {
+				goto safe;
+			}
+		}
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "number of bound variables does not match number of tokens");
+		ret = -1;
+		goto clean_up;
+	}
+
+	if (!placeholders) {
+		/* nothing to do; good! */
+		return 0;
 	}
 
 	if (stmt->supports_placeholders == query_type && !stmt->named_rewrite_template) {
@@ -175,26 +196,6 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 		query_type = PDO_PLACEHOLDER_POSITIONAL;
 	}
 
-	params = stmt->bound_params;
-
-	if (bindno && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE && params && bindno != zend_hash_num_elements(params)) {
-		/* extra bit of validation for instances when same params are bound more than once */
-		if (query_type != PDO_PLACEHOLDER_POSITIONAL && bindno > zend_hash_num_elements(params)) {
-			int ok = 1;
-			for (plc = placeholders; plc; plc = plc->next) {
-				if ((param = zend_hash_str_find_ptr(params, plc->pos, plc->len)) == NULL) {
-					ok = 0;
-					break;
-				}
-			}
-			if (ok) {
-				goto safe;
-			}
-		}
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "number of bound variables does not match number of tokens");
-		ret = -1;
-		goto clean_up;
-	}
 safe:
 	/* what are we going to do ? */
 	if (stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {

@@ -10,10 +10,10 @@ Closure 046: Rebinding: preservation of previous scope when "static" given as sc
 $nonstaticUnscoped = function () { var_dump(isset(A::$priv)); var_dump(isset($this)); };
 
 class A {
-	private static $priv = 7;
-	function getClosure() {
-		return function() { var_dump(isset(A::$priv)); var_dump(isset($this)); };
-	}
+    private static $priv = 7;
+    function getClosure() {
+        return function() { var_dump(isset(A::$priv)); var_dump(isset($this)); };
+    }
 }
 class B extends A {}
 
@@ -36,6 +36,7 @@ echo "After binding, with different instance for the bound one", "\n";
 $d = $nonstaticScoped->bindTo(new B, "static"); $d(); echo "\n";
 
 echo "Done.\n";
+?>
 --EXPECTF--
 Before binding
 bool(false)

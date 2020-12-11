@@ -6,10 +6,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_readable ( string $filename );
-   Description: Tells whether the filename is readable.
-*/
-
 /* test is_executable() with invalid arguments */
 
 echo "*** Testing is_readable(): usage variations ***\n";
@@ -17,7 +13,7 @@ echo "*** Testing is_readable(): usage variations ***\n";
 $file_handle = fopen(__FILE__, "r");
 unset($file_handle);
 
-echo "\n*** Testing is_readable() on miscelleneous filenames ***\n";
+echo "\n*** Testing is_readable() on miscellaneous filenames ***\n";
 $misc_files = array(
   0,
   1234,
@@ -37,10 +33,10 @@ foreach( $misc_files as $misc_file ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_readable(): usage variations ***
 
-*** Testing is_readable() on miscelleneous filenames ***
+*** Testing is_readable() on miscellaneous filenames ***
 bool(false)
 bool(false)
 bool(false)

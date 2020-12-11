@@ -269,6 +269,36 @@ class Tester
     }
 
     /**
+     * Skip if not running as root.
+     */
+    static public function skipIfNotRoot()
+    {
+        if (getmyuid() != 0) {
+            die('skip not running as root');
+        }
+    }
+
+    /**
+     * Skip if running as root.
+     */
+    static public function skipIfRoot()
+    {
+        if (getmyuid() == 0) {
+            die('skip running as root');
+        }
+    }
+
+    /**
+     * Skip if posix extension not loaded.
+     */
+    static public function skipIfPosixNotLoaded()
+    {
+        if (!extension_loaded('posix')) {
+            die('skip posix extension not loaded');
+        }
+    }
+
+    /**
      * Tester constructor.
      *
      * @param string|array $configTemplate
@@ -622,7 +652,7 @@ class Tester
         $read = [$this->outDesc];
         $write = null;
         $except = null;
-        if (stream_select($read, $write, $except, 3)) {
+        if (stream_select($read, $write, $except, $timeout=3)) {
             return fgets($this->outDesc);
         } else {
             return null;
@@ -663,6 +693,38 @@ class Tester
         $lines = $this->getLogLines();
 
         return $lines[0] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getUser()
+    {
+        return get_current_user();
+    }
+
+    /**
+     * @return string
+     */
+    public function getGroup()
+    {
+        return get_current_group();
+    }
+
+    /**
+     * @return int
+     */
+    public function getUid()
+    {
+        return getmyuid();
+    }
+
+    /**
+     * @return int
+     */
+    public function getGid()
+    {
+        return getmygid();
     }
 
     /**
@@ -761,6 +823,10 @@ class Tester
             'ADDR:UDS' => ['getAddr', 'uds'],
             'PORT' => ['getPort', 'ip'],
             'INCLUDE:CONF' => self::CONF_DIR . '/*.conf',
+            'USER' => ['getUser'],
+            'GROUP' => ['getGroup'],
+            'UID' => ['getUid'],
+            'GID' => ['getGid'],
         ];
         $aliases = [
             'ADDR' => 'ADDR:IPv4',
@@ -800,7 +866,17 @@ class Tester
     {
         $port = $this->getPort($type, $pool, true);
         if ($type === 'uds') {
-            return $this->getFile($port . '.sock');
+            $address = $this->getFile($port . '.sock');
+
+            // Socket max path length is 108 on Linux and 104 on BSD,
+            // so we use the latter
+            if (strlen($address) <= 104) {
+                return $address;
+            }
+
+            return sys_get_temp_dir().'/'.
+                hash('crc32', dirname($address)).'-'.
+                basename($address);
         }
 
         return $this->getHost($type) . ':' . $port;

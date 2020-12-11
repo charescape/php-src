@@ -1,21 +1,21 @@
 --TEST--
-Testing clone on objects whoose class derived from DateTimeZone class
+Testing clone on objects whose class derived from DateTimeZone class
 --FILE--
 <?php
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 
 class DateTimeZoneExt1 extends DateTimeZone {
-	public $property1 = 99;
-	public $property2 = "Hello";
+    public $property1 = 99;
+    public $property2 = "Hello";
 }
 
 class DateTimeZoneExt2 extends DateTimeZoneExt1 {
-	public $property3 = true;
-	public $property4 = 10.5;
+    public $property3 = true;
+    public $property4 = 10.5;
 }
 
-echo "*** Testing clone on objects whoose class derived from DateTimeZone class ***\n";
+echo "*** Testing clone on objects whose class derived from DateTimeZone class ***\n";
 
 $d1 = new DateTimeZoneExt1("Europe/London");
 var_dump($d1);
@@ -29,7 +29,7 @@ var_dump($d2_clone);
 
 ?>
 --EXPECTF--
-*** Testing clone on objects whoose class derived from DateTimeZone class ***
+*** Testing clone on objects whose class derived from DateTimeZone class ***
 object(DateTimeZoneExt1)#%d (4) {
   ["property1"]=>
   int(99)
